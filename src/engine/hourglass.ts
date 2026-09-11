@@ -11,6 +11,7 @@ export type Grain = {
   color: string
   sig: string | null
   born: number
+  side: 'up' | 'down'
 }
 
 export type TxSpec = {
@@ -76,6 +77,7 @@ export class HourglassSim {
       color: familyColor(family),
       sig,
       born: performance.now(),
+      side: 'up',
     }
   }
 
@@ -123,14 +125,15 @@ export class HourglassSim {
         g.vx += -g.x * 8 * t
       }
       const nextY = g.y + g.vy * t * 1.15
-      if (g.y < -0.015 && nextY >= -0.015) {
+      if (g.side === 'up' && nextY >= -0.028) {
         if (this.neckAcc >= 1) {
           this.neckAcc -= 1
+          g.side = 'down'
         } else {
           g.vy = Math.min(g.vy, 0)
-          g.y = Math.min(g.y, -0.03)
-          g.vx *= 0.6
-          g.x += g.vx * t * 18
+          g.y = Math.min(g.y, -0.032)
+          g.vx *= 0.55
+          g.x += -g.x * 10 * t
           this.constrain(g)
           continue
         }
@@ -144,6 +147,13 @@ export class HourglassSim {
       this.constrain(g)
     }
     this.collide()
+    for (const g of this.grains) {
+      if (g.side === 'up' && g.y > -0.03) {
+        g.y = -0.032
+        g.vy = Math.min(0, g.vy)
+      }
+      this.constrain(g)
+    }
   }
 
   /** Place grains as two piles — diagram, not a movie. */
