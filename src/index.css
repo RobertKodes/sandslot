@@ -1,0 +1,234 @@
+:root {
+  color-scheme: dark;
+  --soot: #161310;
+  --vellum: #e4d5b8;
+  --ochre: #c4893a;
+  --celeste: #6e9aa3;
+  --brass: #a9844a;
+  --oxide: #5c3a28;
+  --ink: #1c1814;
+  --ash: #8a8174;
+  --bench: #1c1712;
+  font-family: 'Newsreader', 'Iowan Old Style', 'Palatino Linotype', Palatino, serif;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+  height: 100%;
+  background: var(--soot);
+  color: var(--vellum);
+}
+
+body {
+  min-height: 100dvh;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, #2a221b 0%, transparent 55%),
+    var(--soot);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.bench {
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  padding: 0.85rem 1rem 0.7rem;
+  gap: 0.35rem;
+  max-width: 52rem;
+  margin: 0 auto;
+}
+
+.plate {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--brass) 45%, transparent);
+  padding-bottom: 0.55rem;
+}
+
+.kicker {
+  margin: 0;
+  font-family: 'Azeret Mono', ui-monospace, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--celeste);
+}
+
+h1 {
+  margin: 0.1rem 0 0;
+  font-weight: 600;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  letter-spacing: 0.04em;
+  font-variation-settings: 'opsz' 72;
+  color: var(--vellum);
+}
+
+.lede {
+  margin: 0.15rem 0 0;
+  font-style: italic;
+  font-size: 0.95rem;
+  color: color-mix(in srgb, var(--vellum) 70%, var(--oxide));
+}
+
+.flip {
+  appearance: none;
+  background: linear-gradient(#8a6a38, var(--brass) 40%, #6e5228);
+  border: 1px solid #3d2a14;
+  color: var(--ink);
+  min-width: 4.6rem;
+  padding: 0.45rem 0.65rem 0.4rem;
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(228, 213, 184, 0.35),
+    0 2px 0 #2a1c10;
+}
+
+.flip:hover {
+  filter: brightness(1.06);
+}
+
+.flip.held {
+  background: linear-gradient(#6e9aa3, #4e737a);
+  color: var(--soot);
+}
+
+.flip-knob {
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f0e2c4, #3a2a16 70%);
+  border: 1px solid #1a140e;
+}
+
+.flip-label {
+  font-family: 'Azeret Mono', ui-monospace, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.stage {
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  display: grid;
+}
+
+.glass {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  touch-action: manipulation;
+}
+
+.hud {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.45rem 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--celeste) 35%, transparent);
+  padding-top: 0.55rem;
+  font-family: 'Azeret Mono', ui-monospace, monospace;
+}
+
+.read {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.read .k {
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+
+.read .v {
+  font-size: clamp(0.78rem, 2.4vw, 1.05rem);
+  color: var(--vellum);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.read .v em {
+  font-style: normal;
+  margin-left: 0.2em;
+  font-size: 0.7em;
+  color: var(--celeste);
+}
+
+.read.live .v {
+  color: var(--ochre);
+}
+
+.legend {
+  grid-column: 1 / -1;
+  list-style: none;
+  margin: 0.15rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.9rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+
+.legend i {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  margin-right: 0.35rem;
+  vertical-align: middle;
+  box-shadow: 0 0 0 1px rgba(22, 19, 16, 0.6);
+}
+
+@media (max-width: 640px) {
+  .bench {
+    padding: 0.65rem 0.7rem 0.55rem;
+  }
+
+  .stage {
+    min-height: 52vh;
+  }
+
+  .hud {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .plate {
+    align-items: center;
+  }
+
+  h1 {
+    font-size: 1.7rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip-knob {
+    transition: none;
+  }
+}
