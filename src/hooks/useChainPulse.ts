@@ -34,9 +34,9 @@ export function useChainPulse(paused: boolean) {
     const pool = poolRef.current!
     const ac = new AbortController()
     let watchAt = 0
-    let lastSlot = 0
-    let lastPerf = 0
-    let lastSig = 0
+    let lastSlot = -1e12
+    let lastPerf = -1e12
+    let lastSig = -1e12
     let fails = 0
 
     const tick = async () => {

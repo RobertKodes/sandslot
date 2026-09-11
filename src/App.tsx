@@ -21,7 +21,7 @@ export default function App() {
   const simRef = useRef<HourglassSim | null>(null)
   if (!simRef.current) {
     const sim = new HourglassSim()
-    sim.seed(96)
+    sim.seed(170)
     simRef.current = sim
   }
 
@@ -52,14 +52,19 @@ export default function App() {
 
     const fit = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      const rect = canvas.getBoundingClientRect()
-      canvas.width = Math.max(1, Math.floor(rect.width * dpr))
-      canvas.height = Math.max(1, Math.floor(rect.height * dpr))
+      const parent = canvas.parentElement ?? canvas
+      const rect = parent.getBoundingClientRect()
+      const cssW = Math.max(1, rect.width)
+      const cssH = Math.max(1, rect.height)
+      const w = Math.max(1, Math.floor(cssW * dpr))
+      const h = Math.max(1, Math.floor(cssH * dpr))
+      if (canvas.width !== w) canvas.width = w
+      if (canvas.height !== h) canvas.height = h
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
     fit()
     const ro = new ResizeObserver(fit)
-    ro.observe(canvas)
+    ro.observe(canvas.parentElement ?? canvas)
 
     const loop = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000)
@@ -76,7 +81,8 @@ export default function App() {
       sim.reduced = reducedRef.current
       sim.tps = tpsRef.current
       sim.step(dt, () => pullRef.current())
-      const rect = canvas.getBoundingClientRect()
+      const parent = canvas.parentElement ?? canvas
+      const rect = parent.getBoundingClientRect()
       drawHourglass(ctx, rect.width, rect.height, sim, {
         frozen: frozenRef.current,
         flip: flipRef.current,

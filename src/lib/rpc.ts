@@ -8,6 +8,14 @@ const DEFAULTS = [
   'https://solana.llamarpc.com',
 ]
 
+/** Strip `solana-client` so public RPCs do not CORS-preflight-fail in the browser. */
+function browserFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const headers = new Headers(init?.headers)
+  headers.delete('solana-client')
+  headers.set('content-type', 'application/json')
+  return fetch(input, { ...init, headers })
+}
+
 export function rpcEndpoints(): string[] {
   const extra = import.meta.env.VITE_RPC_URL
   const list = extra && extra.startsWith('http') ? [extra, ...DEFAULTS] : DEFAULTS
@@ -27,6 +35,7 @@ export class RpcPool {
           commitment: 'confirmed',
           disableRetryOnRateLimit: true,
           confirmTransactionInitialTimeout: 8000,
+          fetch: browserFetch,
         }),
     )
   }
@@ -37,7 +46,13 @@ export class RpcPool {
 
   get host(): string {
     try {
-      return new URL(this.url).host.replace(/^www\./, '')
+      const h = new URL(this.url).host
+      if (h.includes('publicnode')) return 'publicnode'
+      if (h.includes('mainnet-beta')) return 'official'
+      if (h.includes('drpc')) return 'drpc'
+      if (h.includes('ankr')) return 'ankr'
+      if (h.includes('llamarpc')) return 'llama'
+      return h.replace(/^www\./, '').split('.')[0] ?? 'rpc'
     } catch {
       return 'rpc'
     }

@@ -18,24 +18,24 @@ export type TxSpec = {
   sig: string | null
 }
 
-const MAX_GRAINS = 280
-const REST = 0.08
-const FRICTION = 0.78
-const GRAV = 1.55
+const MAX_GRAINS = 380
+const REST = 0.05
+const FRICTION = 0.72
+const GRAV = 1.85
 
 /** Hourglass half-width in normalized y ∈ [-1, 1], 0 at the neck. */
 export function glassHalfW(y: number): number {
   const ay = Math.min(1, Math.abs(y))
-  if (ay < 0.055) return 0.052 + ay * 0.35
-  const u = (ay - 0.055) / 0.945
-  const bulb = Math.sin(Math.pow(u, 0.92) * Math.PI)
-  return 0.068 + bulb * 0.4
+  if (ay < 0.048) return 0.036 + ay * 0.45
+  const u = (ay - 0.048) / 0.952
+  const bulb = Math.sin(Math.pow(u, 0.9) * Math.PI)
+  return 0.055 + bulb * 0.36
 }
 
 export function spawnRateFromTps(tps: number | null): number {
   if (tps == null || !Number.isFinite(tps)) return 8
   const n = Math.max(0, Math.min(6000, tps))
-  return 5 + n / 130
+  return 8 + n / 110
 }
 
 export class HourglassSim {
@@ -44,6 +44,7 @@ export class HourglassSim {
   reduced = false
   tps: number | null = null
   private spawnAcc = 0
+  private neckAcc = 0
   private rng = 0.37
 
   private rand(): number {
@@ -51,20 +52,20 @@ export class HourglassSim {
     return this.rng
   }
 
-  seed(n = 90) {
+  seed(n = 170) {
     this.grains = []
     const families: Family[] = ['SYS', 'TKN', 'JUP', 'RAY', 'STK', '???']
     for (let i = 0; i < n; i++) {
       const family = families[i % families.length]!
-      const y = -0.82 + this.rand() * 0.55
-      const hw = glassHalfW(y) - 0.03
+      const y = -0.88 + this.rand() * 0.62
+      const hw = Math.max(0.02, glassHalfW(y) - 0.025)
       const x = (this.rand() * 2 - 1) * hw
       this.grains.push(this.makeGrain(x, y, family, null))
     }
   }
 
   makeGrain(x: number, y: number, family: Family, sig: string | null): Grain {
-    const r = 0.014 + this.rand() * 0.007
+    const r = 0.0072 + this.rand() * 0.0038
     return {
       x,
       y,
@@ -114,13 +115,29 @@ export class HourglassSim {
       this.spawn(spec)
     }
 
-    const neckFlow = 0.35 + Math.min(1.4, (this.tps ?? 800) / 2800)
+    const tps = this.tps ?? 1200
+    this.neckAcc += (3.5 + Math.min(36, tps / 110)) * t
     for (const g of this.grains) {
       g.vy += GRAV * t
-      if (Math.abs(g.y) < 0.14) {
-        g.vy += neckFlow * t * 0.35
-        g.vx += (this.rand() - 0.5) * 0.55 * t
-        g.vx *= 0.92
+      if (g.y < -0.02 && g.y > -0.22) {
+        g.vx += -g.x * 8 * t
+      }
+      const nextY = g.y + g.vy * t * 1.15
+      if (g.y < -0.015 && nextY >= -0.015) {
+        if (this.neckAcc >= 1) {
+          this.neckAcc -= 1
+        } else {
+          g.vy = Math.min(g.vy, 0)
+          g.y = Math.min(g.y, -0.03)
+          g.vx *= 0.6
+          g.x += g.vx * t * 18
+          this.constrain(g)
+          continue
+        }
+      }
+      if (Math.abs(g.y) < 0.12) {
+        g.vx += (this.rand() - 0.5) * 0.4 * t
+        g.vx *= 0.9
       }
       g.x += g.vx * t * 18
       g.y += g.vy * t
@@ -181,7 +198,7 @@ export class HourglassSim {
   private collide() {
     const list = this.grains
     const n = list.length
-    const cell = 0.04
+    const cell = 0.022
     const buckets = new Map<number, number[]>()
     const key = (ix: number, iy: number) => iy * 4096 + ix
     for (let i = 0; i < n; i++) {
